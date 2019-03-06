@@ -29,6 +29,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun setup() {
         createNotificationChannel()
+        setNotificationButtonState(isNotifyEnabled = true, isUpdateEnable = false, isCancelEnable = false)
         btn_notify.setOnClickListener { sendNotification() }
         btn_cancel.setOnClickListener { cancelNotification() }
         btn_update.setOnClickListener { updateNotification() }
@@ -38,6 +39,7 @@ class MainActivity : AppCompatActivity() {
         with(NotificationManagerCompat.from(this)) {
             notify(NOTIFICATION_ID, getNotificationBuilder().build())
         }
+        setNotificationButtonState(isNotifyEnabled = false, isUpdateEnable = true, isCancelEnable = true)
     }
 
     private fun createNotificationChannel() {
@@ -78,11 +80,21 @@ class MainActivity : AppCompatActivity() {
         with(NotificationManagerCompat.from(this)){
             notify(NOTIFICATION_ID, buider.build())
         }
+
+        setNotificationButtonState(isNotifyEnabled = false, isUpdateEnable = false, isCancelEnable = true)
     }
 
     private fun cancelNotification() {
         with(NotificationManagerCompat.from(this)) {
             cancel(NOTIFICATION_ID)
         }
+
+        setNotificationButtonState(isNotifyEnabled = true, isUpdateEnable = false, isCancelEnable = false)
+    }
+
+    private fun setNotificationButtonState(isNotifyEnabled: Boolean, isUpdateEnable: Boolean, isCancelEnable: Boolean) {
+        btn_notify.isEnabled = isNotifyEnabled
+        btn_update.isEnabled = isUpdateEnable
+        btn_cancel.isEnabled = isCancelEnable
     }
 }
