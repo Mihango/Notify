@@ -19,11 +19,13 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         const val ACTION_UPDATE_NOTIFICATION = "com.techmashinani.notify.ACTION_UPDATE_NOTIFICATION"
+        const val ACTION_DELETE_NOTIFICATION = "com.techmashinani.notify.ACTION_DELETE_NOTIFICATION"
         const val PRIMARY_CHANNEL_ID = "primary_notification_channel"
         const val NOTIFICATION_ID = 0
     }
 
     private val mReceiver: NotificationReceiver by lazy { NotificationReceiver() }
+    private val mDeleteReceiver: DeleteReceiver by lazy { DeleteReceiver() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,6 +33,7 @@ class MainActivity : AppCompatActivity() {
 
         setup()
         registerReceiver(mReceiver, IntentFilter(ACTION_UPDATE_NOTIFICATION))
+        registerReceiver(mDeleteReceiver, IntentFilter(ACTION_DELETE_NOTIFICATION))
     }
 
     private fun setup() {
@@ -39,18 +42,6 @@ class MainActivity : AppCompatActivity() {
         btn_notify.setOnClickListener { sendNotification() }
         btn_cancel.setOnClickListener { cancelNotification() }
         btn_update.setOnClickListener { updateNotification() }
-    }
-
-    private fun sendNotification() {
-        val updateIntent = Intent(ACTION_UPDATE_NOTIFICATION)
-        val updatePendingIntent = PendingIntent.getBroadcast(this, NOTIFICATION_ID, updateIntent, PendingIntent.FLAG_ONE_SHOT)
-
-        with(NotificationManagerCompat.from(this)) {
-            notify(NOTIFICATION_ID, getNotificationBuilder()
-                .addAction(R.drawable.ic_action_history, "Update Notification", updatePendingIntent)
-                .build())
-        }
-        setNotificationButtonState(isNotifyEnabled = false, isUpdateEnable = true, isCancelEnable = true)
     }
 
     private fun createNotificationChannel() {
@@ -68,10 +59,26 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun sendNotification() {
+        val updateIntent = Intent(ACTION_UPDATE_NOTIFICATION)
+        val updatePendingIntent = PendingIntent.getBroadcast(this, NOTIFICATION_ID, updateIntent, PendingIntent.FLAG_ONE_SHOT)
+
+        with(NotificationManagerCompat.from(this)) {
+            notify(NOTIFICATION_ID, getNotificationBuilder()
+                .addAction(R.drawable.ic_action_history, "Update Notification", updatePendingIntent)
+                .build())
+        }
+        setNotificationButtonState(isNotifyEnabled = false, isUpdateEnable = true, isCancelEnable = true)
+    }
+
+
+
     private fun getNotificationBuilder(): NotificationCompat.Builder {
         val intent = Intent(this, MainActivity::class.java)
-        val notificationPendingIntent =
-            PendingIntent.getActivity(this, NOTIFICATION_ID, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        val notificationPendingIntent = PendingIntent.getActivity(this, NOTIFICATION_ID, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+
+        val deleteIntent = Intent(ACTION_DELETE_NOTIFICATION)
+        val deletePendingIntent = PendingIntent.getBroadcast(this, NOTIFICATION_ID, deleteIntent, PendingIntent.FLAG_ONE_SHOT)
 
         return NotificationCompat.Builder(this@MainActivity, PRIMARY_CHANNEL_ID).apply {
             setContentTitle("You have been notified!")
@@ -81,6 +88,7 @@ class MainActivity : AppCompatActivity() {
             setAutoCancel(true)
             priority = NotificationCompat.PRIORITY_HIGH
             setDefaults(NotificationCompat.DEFAULT_ALL)
+            setDeleteIntent(deletePendingIntent)
         }
     }
 
@@ -95,7 +103,6 @@ class MainActivity : AppCompatActivity() {
         with(NotificationManagerCompat.from(this)){
             notify(NOTIFICATION_ID, builder.build())
         }
-
         setNotificationButtonState(isNotifyEnabled = false, isUpdateEnable = false, isCancelEnable = true)
     }
 
@@ -103,7 +110,6 @@ class MainActivity : AppCompatActivity() {
         with(NotificationManagerCompat.from(this)) {
             cancel(NOTIFICATION_ID)
         }
-
         setNotificationButtonState(isNotifyEnabled = true, isUpdateEnable = false, isCancelEnable = false)
     }
 
@@ -115,16 +121,20 @@ class MainActivity : AppCompatActivity() {
 
     // broadcast receiver for listening to reply
     inner class NotificationReceiver : BroadcastReceiver() {
-
         override fun onReceive(context: Context?, intent: Intent?) {
-            // update notification
             updateNotification()
         }
+    }
 
+    inner class DeleteReceiver : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            setNotificationButtonState(isNotifyEnabled = true, isUpdateEnable = false, isCancelEnable = false)
+        }
     }
 
     override fun onDestroy() {
         unregisterReceiver(mReceiver)
+        unregisterReceiver(mDeleteReceiver)
         super.onDestroy()
     }
 }
