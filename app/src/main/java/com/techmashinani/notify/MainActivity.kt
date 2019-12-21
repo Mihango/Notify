@@ -10,6 +10,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import kotlinx.android.synthetic.main.activity_main.*
 
 
 class MainActivity : AppCompatActivity() {
@@ -25,10 +26,13 @@ class MainActivity : AppCompatActivity() {
 
         createNotificationChannel()
 
-
-        with(NotificationManagerCompat.from(this)) {
-            notify(200, createNotification().build())
+        btn_notify.setOnClickListener {
+            with(NotificationManagerCompat.from(this)) {
+                notify(200, createNotification().build())
+            }
         }
+
+        btn_update.setOnClickListener { sendMessage("Hello mum!") }
     }
 
     private fun createNotification(): NotificationCompat.Builder {
@@ -74,15 +78,17 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun sendIntent(message: String) {
+    private fun sendMessage(message: String) {
         val sendIntent = Intent().apply {
             action = Intent.ACTION_SEND
             type = "text/plain"
             putExtra(Intent.EXTRA_TEXT, message)
         }
+        
+        val chooser = Intent.createChooser(sendIntent, "Send message with:")
 
         if (sendIntent.resolveActivity(packageManager) != null) {
-            startActivity(sendIntent)
+            startActivity(chooser)
         }
     }
 }
