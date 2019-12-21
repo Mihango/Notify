@@ -15,6 +15,10 @@
 
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+
+            <intent-filter>
+                <action android:name="com.techmashinani.notify.ACTION_SNOOZE" />
+            </intent-filter>
         </activity>
     </application>
 

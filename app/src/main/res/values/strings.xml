@@ -2,4 +2,7 @@
     <string name="app_name">Notify</string>
     <string name="notify_me">Notify Me!</string>
     <string name="update">UPDATE</string>
+    <string name="sample_channle">Sample channel</string>
+    <string name="channel_desc">Channel description - more here</string>
+    <string name="snooze">Snooze</string>
 </resources>
